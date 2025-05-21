@@ -9,6 +9,9 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
+                script {
+                    sh 'rm -rf * .[^.]*' // Clean workspace
+                }
                 checkout scm
             }
         }
@@ -76,14 +79,6 @@ pipeline {
                         sh "docker rmi ${imageName} || true"
                     }
                 }
-            }
-        }
-    }
-
-    post {
-        always {
-            node {
-                cleanWs()
             }
         }
     }
