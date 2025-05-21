@@ -53,7 +53,7 @@ pipeline {
                     env.CHANGED_SERVICES.split(',').each { service ->
                         def prefix = "${env.DOCKERHUB_USERNAME}/${service}"
                         def tag = "${env.COMMIT_ID}"
-                        echo "Building image ${imageName}"
+                        echo "Building image ${prefix}:${tag} for service ${service}"
 
                         sh """
                             DOCKER_BUILDKIT=1 ./mvnw clean install -pl ${service} -P buildDocker \\
