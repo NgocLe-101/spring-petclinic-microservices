@@ -11,6 +11,7 @@ pipeline {
             steps {
                 script {
                     // Clean workspace
+                    echo "Cleaning workspace..."
                     sh 'rm -rf * .[^.]*'
                 }
             }
