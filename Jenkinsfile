@@ -44,6 +44,22 @@ pipeline {
             }
         }
 
+        stage('Build') {
+            when {
+                expression { env.CHANGED_SERVICES }
+            }
+            steps {
+                script {
+                    env.CHANGED_SERVICES.split(',').each { service ->
+                        echo "Building ${service}..."
+                        dir(service) {
+                            sh 'mvn clean package'
+                        }
+                    }
+                }
+            }
+        }
+
         stage('Build Images') {
             when {
                 expression { env.CHANGED_SERVICES }
@@ -51,9 +67,15 @@ pipeline {
             steps {
                 script {
                     env.CHANGED_SERVICES.split(',').each { service ->
-                        def imageName = "${env.DOCKERHUB_USERNAME}/${service}:${env.COMMIT_ID}"
+                        def prefix = "${env.DOCKERHUB_USERNAME}/${service}"
+                        def tag = "${env.COMMIT_ID}"
                         echo "Building image ${imageName}"
-                        sh "docker build -t ${imageName} ${service}"
+
+                        sh """
+                            DOCKER_BUILDKIT=1 ./mvnw clean install -pl ${service} -P buildDocker \\
+                            -D docker.image.prefix=${prefix} \\
+                            -D docker.image.tag=${tag}
+                            """
                     }
                 }
             }
