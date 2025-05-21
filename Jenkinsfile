@@ -12,7 +12,7 @@ pipeline {
                 script {
                     // Clean workspace
                     echo "Cleaning workspace..."
-                    sh 'rm -rf * .[^.]*'
+                    sh 'rm -rf ./*'
                 }
             }
         }
