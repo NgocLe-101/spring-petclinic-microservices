@@ -7,11 +7,17 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
+        stage('Preparation') {
             steps {
                 script {
-                    sh 'rm -rf * .[^.]*' // Clean workspace
+                    // Clean workspace
+                    sh 'rm -rf * .[^.]*'
                 }
+            }
+        }
+
+        stage('Checkout') {
+            steps {
                 checkout scm
             }
         }
