@@ -39,7 +39,7 @@ pipeline {
 
                     echo "Changed services: ${changes}"
 
-                    env.CHANGED_SERVICES = servicesChanged.join(',')
+                    env.CHANGED_SERVICES = changes.join(',')
                 }
             }
         }
