@@ -12,8 +12,9 @@ pipeline {
                 script {
                     // Get current commit SHA
                     env.COMMIT_ID = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+                    sh "whoami"
                     echo "Commit ID: ${env.COMMIT_ID}"
-
+                
                     // Compare current commit with previous successful commit
                     def diffTarget = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT ?: "HEAD~1"
                     def changes = sh(
