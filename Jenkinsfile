@@ -60,7 +60,7 @@ pipeline {
                         dir(service) {
                             def jarName = sh(script: "ls *.jar", returnStdout: true).trim()
                             def artifactName = jarName.replace('.jar', '')
-                            sh "docker build -f ../docker/Dockerfile --build-arg ARTIFACT_NAME=${artifactName} -t ${prefix}:${tag} ."
+                            sh "sudo docker build -f ../docker/Dockerfile --build-arg ARTIFACT_NAME=${artifactName} -t ${prefix}:${tag} ."
                         }
                     }
                 }
