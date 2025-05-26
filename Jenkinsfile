@@ -40,7 +40,6 @@ pipeline {
                         dir(service) {
                             sh '../mvnw clean package -DskipTests'
                             sh 'cp target/*.jar .'
-                            sh 'rm -rf target/'
                         }
                     }
                 }
@@ -93,6 +92,11 @@ pipeline {
                     env.CHANGED_SERVICES.split(',').each { service ->
                         def imageName = "${env.DOCKERHUB_USERNAME}/${service}:${env.COMMIT_ID}"
                         sh "docker rmi ${imageName} || true"
+                        // Clean build files
+                        dir(service) {
+                            sh 'rm -rf *.jar'
+                            sh 'rm -rf target/'
+                        }
                     }
                 }
             }
