@@ -7,22 +7,6 @@ pipeline {
     }
 
     stages {
-        stage('Preparation') {
-            steps {
-                script {
-                    // Clean workspace
-                    echo "Cleaning workspace..."
-                    sh 'rm -rf ./*'
-                }
-            }
-        }
-
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
         stage('Detect Changes') {
             steps {
                 script {
@@ -44,6 +28,24 @@ pipeline {
             }
         }
 
+        stage("Build app") {
+            when {
+                expression { env.CHANGED_SERVICES }
+            }
+            steps {
+                script {
+                    env.CHANGED_SERVICES.split(',').each { service ->
+                        echo "Building service ${service}"
+                        dir(service) {
+                            sh '../mvnw clean package -DskipTests'
+                            sh 'cp target/*.jar .'
+                            sh 'rm -rf target/'
+                        }
+                    }
+                }
+            }
+        }
+
         stage('Build Images') {
             when {
                 expression { env.CHANGED_SERVICES }
@@ -54,12 +56,12 @@ pipeline {
                         def prefix = "${env.DOCKERHUB_USERNAME}/${service}"
                         def tag = "${env.COMMIT_ID}"
                         echo "Building image ${prefix}:${tag} for service ${service}"
-
-                        sh """
-                            DOCKER_BUILDKIT=1 ./mvnw clean install -pl ${service} -P buildDocker \\
-                            -D docker.image.prefix=${prefix} \\
-                            -D docker.image.tag=${tag}
-                            """
+                        
+                        dir(service) {
+                            def jarName = sh(script: "ls *.jar", returnStdout: true).trim()
+                            def artifactName = jarName.replace('.jar', '')
+                            sh "docker build -f ../docker/Dockerfile --build-arg ARTIFACT_NAME=${artifactName} -t ${prefix}:${tag} ."
+                        }
                     }
                 }
             }
