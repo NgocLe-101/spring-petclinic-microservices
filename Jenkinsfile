@@ -108,11 +108,10 @@ pipeline {
             }
             steps {
                 script {
-                    def gitopsRepo = "https://github.com/NgocLe-101/spring-petclinic-helm-charts.git"
+                    def gitopsRepo = "git@github.com:NgocLe-101/spring-petclinic-helm-charts.git"
 
                     sh 'mkdir -p gitops'
                     dir('gitops') {
-                        withCredentials('github-token') {
                         sh "git clone ${gitopsRepo} ."
                         sh "git checkout main"
 
@@ -128,7 +127,6 @@ pipeline {
                         sh "git add ."
                         sh "git commit -m 'Update ${env.CHANGED_SERVICES}' || true"
                             sh "git push origin main"
-                        }
                     }
 
                     echo "GitOps repository updated with new image tags."
