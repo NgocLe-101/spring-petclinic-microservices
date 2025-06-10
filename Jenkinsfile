@@ -126,7 +126,9 @@ pipeline {
                         // Commit and push changes
                         sh "git add ."
                         sh "git commit -m 'Update ${env.CHANGED_SERVICES}' || true"
-                        sh "git push origin main"
+                        withCredentials('github-token') {
+                            sh "git push origin main"
+                        }
                     }
 
                     echo "GitOps repository updated with new image tags."
