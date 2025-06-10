@@ -101,6 +101,37 @@ pipeline {
                 }
             }
         }
+
+        stage("Update GitOps repo") {
+            steps {
+                script {
+                    def gitopsRepo = "https://github.com/NgocLe-101/spring-petclinic-helm-charts.git"
+
+                    sh 'mkdir -p gitops'
+                    dir('gitops') {
+                        sh "git clone ${gitopsRepo} ."
+                        sh "git checkout main"
+
+                        env.CHANGED_SERVICES.split(',').each { service ->
+                            // Update values.yaml with new image
+                            sh "yq set dev/values/${service}-values.yaml services.${service}.image.tag ${env.COMMIT_ID}"
+                        }
+
+                        // Commit and push changes
+                        sh "git add ."
+                        sh "git commit -m 'Update ${env.CHANGED_SERVICES}' || true"
+                        sh "git push origin main"
+                    }
+
+                    echo "GitOps repository updated with new image tags."
+                }
+            }
+        }
+    }
+    post {
+        always {
+            cleanWs()
+        }
     }
 }
 
