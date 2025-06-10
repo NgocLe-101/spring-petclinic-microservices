@@ -103,6 +103,9 @@ pipeline {
         }
 
         stage("Update GitOps repo") {
+            when {
+                expression { env.CHANGED_SERVICES }
+            }
             steps {
                 script {
                     def gitopsRepo = "https://github.com/NgocLe-101/spring-petclinic-helm-charts.git"
