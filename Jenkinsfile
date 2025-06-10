@@ -120,7 +120,7 @@ pipeline {
                             def serviceName = service.replace('spring-petclinic-', '')
                             // Update values.yaml with new image
                             sh """
-                                yq -i -y '.image.tag = \"${env.COMMIT_ID}\"' dev/values/${serviceName}-values.yaml
+                                yq -i -y '${serviceName}.image.tag = \"${env.COMMIT_ID}\"' dev/values.yaml
                             """
                         }
 
