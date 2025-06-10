@@ -131,7 +131,7 @@ pipeline {
                                 git config user.email "jenkins@example.com"
                                 git add .
                                 git commit -m "Update image tags for services: ${env.CHANGED_SERVICES} at commit ${env.COMMIT_ID}"
-                                git push origin main
+                                git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/username/target-repo.git main
                                 """
 
                         }
