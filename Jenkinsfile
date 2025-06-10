@@ -116,8 +116,9 @@ pipeline {
                         sh "git checkout main"
 
                         env.CHANGED_SERVICES.split(',').each { service ->
+                            def serviceName = service.replace('spring-petclinic-', '')
                             // Update values.yaml with new image
-                            sh "yq set dev/values/${service}-values.yaml services.${service}.image.tag ${env.COMMIT_ID}"
+                            sh "yq set dev/values/${serviceName}-values.yaml serviceNames.${serviceName}.image.tag ${env.COMMIT_ID}"
                         }
 
                         // Commit and push changes
