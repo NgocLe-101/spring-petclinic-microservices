@@ -112,6 +112,7 @@ pipeline {
 
                     sh 'mkdir -p gitops'
                     dir('gitops') {
+                        withCredentials('github-token') {
                         sh "git clone ${gitopsRepo} ."
                         sh "git checkout main"
 
@@ -126,7 +127,6 @@ pipeline {
                         // Commit and push changes
                         sh "git add ."
                         sh "git commit -m 'Update ${env.CHANGED_SERVICES}' || true"
-                        withCredentials('github-token') {
                             sh "git push origin main"
                         }
                     }
