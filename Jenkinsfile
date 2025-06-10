@@ -4,6 +4,7 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub') // Jenkins Credentials ID
         DOCKERHUB_USERNAME = 'ngocle101'
+        GIT_CREDENTIALS = credentials('github-token')
     }
 
     stages {
@@ -108,7 +109,7 @@ pipeline {
             }
             steps {
                 script {
-                    def gitopsRepo = "git@github.com:NgocLe-101/spring-petclinic-helm-charts.git"
+                    def gitopsRepo = "https://github.com/NgocLe-101/spring-petclinic-helm-charts.git"
 
                     sh 'mkdir -p gitops'
                     dir('gitops') {
@@ -124,9 +125,13 @@ pipeline {
                         }
 
                         // Commit and push changes
-                        sh "git add ."
-                        sh "git commit -m 'Update ${env.CHANGED_SERVICES}' || true"
-                            sh "git push origin main"
+                        sh """
+                            git config user.name "Jenkins"
+                            git config user.email "jenkins@example.com"
+                            git add .
+                            git commit -m "Update image tags for services: ${env.CHANGED_SERVICES} at commit ${env.COMMIT_ID}"
+                            git push origin main
+                        """
                     }
 
                     echo "GitOps repository updated with new image tags."
