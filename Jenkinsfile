@@ -4,6 +4,7 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub') // Jenkins Credentials ID
         DOCKERHUB_USERNAME = 'ngocle101'
+        HOME = '/home/ubuntu'
     }
 
     stages {
