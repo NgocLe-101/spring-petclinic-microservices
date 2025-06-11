@@ -8,10 +8,15 @@ spring:
   profiles:
     active: production
   zipkin:
-    baseUrl: http://tracing-server:9411
-  sleuth:
-    sampler:
-      probability: 1.0
+    base-url: http://tracing-server:9411
+  management:
+    endpoints:
+      web:
+        exposure:
+          include: health, info, prometheus
+    tracing:
+      sampling:
+        probability: 1.0
 
 ---
 spring:

@@ -5,9 +5,14 @@ spring:
     import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888/}
   zipkin:
     baseUrl: http://tracing-server:9411
-  sleuth:
-    sampler:
-      probability: 1.0
+  management:
+    endpoints:
+      web:
+        exposure:
+          include: health, info, prometheus
+    tracing:
+      sampling:
+        probability: 1.0
 
 
 ---
