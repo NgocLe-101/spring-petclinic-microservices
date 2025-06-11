@@ -3,6 +3,11 @@ spring:
     name: customers-service
   config:
     import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888/}
+  zipkin:
+    baseUrl: http://tracing-server:9411
+  sleuth:
+    sampler:
+      probability: 1.0
 
 
 ---
