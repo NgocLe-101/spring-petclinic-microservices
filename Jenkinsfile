@@ -19,7 +19,14 @@ pipeline {
                     // Compare current commit with previous successful commit
                     def diffTarget = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT ?: "HEAD~1"
                     def changes = sh(
-                        script: "git diff --name-only ${diffTarget} HEAD | cut -d/ -f1 | grep -E '^(spring-petclinic-).*' | sort -u",
+                        script: """
+                            git diff --name-only ${diffTarget} HEAD \
+                            | cut -d/ -f1 \
+                            | grep -E '^(spring-petclinic-).*' \
+                            | grep -v 'spring-petclinic-admin-server' \
+                            | grep -v 'spring-petclinic-genai-service' \
+                            | sort -u
+                        """,
                         returnStdout: true
                                     ).trim().split("\n")
 
