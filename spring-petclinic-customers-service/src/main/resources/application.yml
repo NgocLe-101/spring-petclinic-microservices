@@ -2,7 +2,7 @@ spring:
   application:
     name: customers-service
   config:
-    import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888/}
+    import: configserver:http://config-server:8888:${CONFIG_SERVER_URL:http://localhost:8888/}
   zipkin:
     baseUrl: http://tracing-server:9411
   management:
