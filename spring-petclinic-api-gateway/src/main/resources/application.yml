@@ -41,7 +41,10 @@ spring:
           filters:
             - StripPrefix=2
             - CircuitBreaker=name=genaiCircuitBreaker,fallbackUri=/fallback
-
+  logging:
+    level:
+      org.springframework.cloud.gateway: TRACE
+      reactor.netty.http.client: DEBUG
 ---
 spring:
   config:
