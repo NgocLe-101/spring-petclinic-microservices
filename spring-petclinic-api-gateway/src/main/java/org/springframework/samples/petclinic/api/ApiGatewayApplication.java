@@ -57,7 +57,6 @@ public class ApiGatewayApplication {
     }
 
     @Bean
-    @LoadBalanced
     public WebClient.Builder loadBalancedWebClientBuilder() {
         return WebClient.builder();
     }
