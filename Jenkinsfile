@@ -43,13 +43,19 @@ pipeline {
             }
             steps {
                 script {
+                    def buildStages = [:]
                     env.CHANGED_SERVICES.split(',').each { service ->
-                        echo "Building service ${service}"
-                        dir(service) {
-                            sh '../mvnw clean package -DskipTests'
-                            sh 'cp target/*.jar .'
+                        buildStages[service] = {
+                            stage("Build ${service}") {
+                                echo "Building service ${service}"
+                                dir(service) {
+                                    sh '../mvnw clean package -DskipTests'
+                                    sh 'cp target/*.jar .'
+                                }
+                            }
                         }
                     }
+                    parallel buildStages
                 }
             }
         }
@@ -60,17 +66,23 @@ pipeline {
             }
             steps {
                 script {
+                    def imageStages = [:]
                     env.CHANGED_SERVICES.split(',').each { service ->
-                        def prefix = "${env.DOCKERHUB_USERNAME}/${service}"
-                        def tag = "${env.COMMIT_ID}"
-                        echo "Building image ${prefix}:${tag} for service ${service}"
-                        
-                        dir(service) {
-                            def jarName = sh(script: "ls *.jar", returnStdout: true).trim()
-                            def artifactName = jarName.replace('.jar', '')
-                            sh "docker build -f ../docker/Dockerfile --build-arg ARTIFACT_NAME=${artifactName} -t ${prefix}:${tag} ."
+                        imageStages[service] = {
+                            stage("Build Image ${service}") {
+                                def prefix = "${env.DOCKERHUB_USERNAME}/${service}"
+                                def tag = "${env.COMMIT_ID}"
+                                echo "Building image ${prefix}:${tag} for service ${service}"
+                                
+                                dir(service) {
+                                    def jarName = sh(script: "ls *.jar", returnStdout: true).trim()
+                                    def artifactName = jarName.replace('.jar', '')
+                                    sh "docker build -f ../docker/Dockerfile --build-arg ARTIFACT_NAME=${artifactName} -t ${prefix}:${tag} ."
+                                }
+                            }
                         }
                     }
+                    parallel imageStages
                 }
             }
         }
@@ -82,11 +94,17 @@ pipeline {
             steps {
                 script {
                     sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_USERNAME --password-stdin'
+                    def pushStages = [:]
                     env.CHANGED_SERVICES.split(',').each { service ->
-                        def imageName = "${env.DOCKERHUB_USERNAME}/${service}:${env.COMMIT_ID}"
-                        echo "Pushing image ${imageName}"
-                        sh "docker push ${imageName}"
+                        pushStages[service] = {
+                            stage("Push ${service}") {
+                                def imageName = "${env.DOCKERHUB_USERNAME}/${service}:${env.COMMIT_ID}"
+                                echo "Pushing image ${imageName}"
+                                sh "docker push ${imageName}"
+                            }
+                        }
                     }
+                    parallel pushStages
                 }
             }
         }
@@ -97,15 +115,21 @@ pipeline {
             }
             steps {
                 script {
+                    def cleanStages = [:]
                     env.CHANGED_SERVICES.split(',').each { service ->
-                        def imageName = "${env.DOCKERHUB_USERNAME}/${service}:${env.COMMIT_ID}"
-                        sh "docker rmi ${imageName} || true"
-                        // Clean build files
-                        dir(service) {
-                            sh 'rm -rf *.jar'
-                            sh 'rm -rf target/'
+                        cleanStages[service] = {
+                            stage("Clean ${service}") {
+                                def imageName = "${env.DOCKERHUB_USERNAME}/${service}:${env.COMMIT_ID}"
+                                sh "docker rmi ${imageName} || true"
+                                // Clean build files
+                                dir(service) {
+                                    sh 'rm -rf *.jar'
+                                    sh 'rm -rf target/'
+                                }
+                            }
                         }
                     }
+                    parallel cleanStages
                 }
             }
         }

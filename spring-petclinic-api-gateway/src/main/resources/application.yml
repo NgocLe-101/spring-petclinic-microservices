@@ -12,24 +12,27 @@ spring:
             fallbackUri: forward:/fallback
         - name: Retry
           args:
-            retries: 1
-            statuses: SERVICE_UNAVAILABLE
+            retries: 3
+            statuses: SERVICE_UNAVAILABLE,BAD_GATEWAY
             methods: GET,POST,PUT,DELETE
+            backoff:
+              firstBackoff: 50ms
+              maxBackoff: 500ms
       routes:
         - id: vets-service
-          uri: http://vets-service:8083
+          uri: lb://vets-service
           predicates:
             - Path=/api/vet/**
           filters:
             - StripPrefix=2
         - id: visits-service
-          uri: http://visits-service:8082
+          uri: lb://visits-service
           predicates:
             - Path=/api/visit/**
           filters:
             - StripPrefix=2
         - id: customers-service
-          uri: http://customers-service:8081
+          uri: lb://customers-service
           predicates:
             - Path=/api/customer/**
           filters:
