@@ -26,3 +26,31 @@ scrape_configs:
   metrics_path: /actuator/prometheus
   static_configs:
   - targets: ['vets-service:8083']
+
+# Istio config metrics
+- job_name: istio-envoy
+  kubernetes_sd_configs:
+  - role: pod
+
+  relabel_configs:
+  # Keep only pods with istio sidecar
+  - source_labels: [__meta_kubernetes_pod_container_name]
+    action: keep
+    regex: istio-proxy
+
+  # Use envoy metrics port
+  - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_port]
+    action: replace
+    target_label: __address__
+    regex: (.+)
+    replacement: $1
+
+  # Fallback to default envoy port
+  - source_labels: [__address__]
+    action: replace
+    target_label: __address__
+    regex: (.+)
+    replacement: ${1}:15090
+
+  metrics_path: /stats/prometheus
+
