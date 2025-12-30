@@ -45,6 +45,7 @@ class OwnerResource {
 
     private final OwnerRepository ownerRepository;
     private final OwnerEntityMapper ownerEntityMapper;
+    private int requestCount = 0;
 
     OwnerResource(OwnerRepository ownerRepository, OwnerEntityMapper ownerEntityMapper) {
         this.ownerRepository = ownerRepository;
@@ -88,5 +89,25 @@ class OwnerResource {
         ownerEntityMapper.map(ownerModel, ownerRequest);
         log.info("Saving owner {}", ownerModel);
         ownerRepository.save(ownerModel);
+    }
+
+    /**
+     * Failing endpoint for testing Istio retry feature
+     * This endpoint fails on 2 out of 3 requests (66% failure rate)
+     * Useful for testing retry policies
+     */
+    @GetMapping(value = "/test-retry")
+    public String testRetry() {
+        requestCount++;
+        log.info("Retry test endpoint called - Request count: {}", requestCount);
+        
+        // Fail on 2 out of 3 requests (only succeed on every 3rd request)
+        if (requestCount % 3 != 0) {
+            log.error("Simulating failure - Request count: {}", requestCount);
+            throw new RuntimeException("Simulated failure for retry testing (request #" + requestCount + ")");
+        }
+        
+        log.info("Request succeeded - Request count: {}", requestCount);
+        return "Success! Request count: " + requestCount;
     }
 }
